@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  image         String?
+  fitnessGoals  String?
+  workoutTypes  String?
+  availability  String?
+  location      String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  matchesAsUser Match[]   @relation("UserMatches")
+  matchesAsPartner Match[] @relation("PartnerMatches")
+  messages      Message[]
+}
+
+model Match {
+  id          String   @id @default(cuid())
+  userId      String
+  partnerId   String
+  status      String   @default("pending")
+  compatibilityScore Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation("UserMatches", fields: [userId], references: [id])
+  partner     User     @relation("PartnerMatches", fields: [partnerId], references: [id])
+  messages    Message[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  matchId   String
+  senderId  String
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  match     Match    @relation(fields: [matchId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
+}
